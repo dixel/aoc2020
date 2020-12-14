@@ -14,11 +14,12 @@
 
 (defn find-corrupted-number [input]
   (loop [previous (into [] (take 25 input))
-         in (drop 25 input)]
+         in (drop 25 input)
+         index 26]
     (cond
       (empty? in) nil
-      (not (xmas-check (first in) previous)) (first in)
-      :else (recur (conj (vec (drop 1 previous)) (first in)) (rest in)))))
+      (not (xmas-check (first in) previous)) [(first in) index]
+      :else (recur (conj (vec (drop 1 previous)) (first in)) (rest in) (inc index)))))
 
 (defn sublists [l]
   (->> (for [i (range 0 (count l))
@@ -28,12 +29,13 @@
           []))
        (filter (complement empty?))))
 
-
-(sublists [1 2 3 4])
-
 (defn find-vulnerability [num input]
-  (for [sublist (sublists input)]
-    (if (= (reduce + sublist) num)
-      (println (min sublist) ":" (max sublist)))))
+  (loop [perms (sublists (vec input))]
+    (let [sublist (first perms)]
+      (if (= (reduce + sublist) num)
+        (+ (apply min sublist) (apply max sublist))
+        (recur (rest perms))))))
 
-(println (find-corrupted-number input))
+(println
+ (let [[num index] (find-corrupted-number input)]
+   (find-vulnerability num (take index input))))

@@ -18,9 +18,12 @@
   (->> (partition 2 (interleave input (rest input)))
        (map #(apply - %))))
 
-(println
- (let [adapters-chain (get-adapter-chain enriched-input)]
-   (* (count (filter #(= 3 %) adapters-chain)) (count (filter #(= 1 %) adapters-chain)))))
+; Task 1
+
+(->> (get-adapter-chain enriched-input)
+     frequencies
+     vals
+     (apply *))
 
 (defn sum-up-to-n [options n res]
   (if (= n 0)
@@ -33,6 +36,8 @@
           (if (>= n o)
             (recur (rest opts) (concat result (sum-up-to-n options (- n o) (conj res o))))
             (recur (rest opts) result)))))))
+
+(defn sum-up-to-n [])
 
 (defn consecutive-ones [coll]
   (loop [res []
@@ -50,6 +55,10 @@
           (= element 1) (recur res 1 true next)
           :else (recur res 0 false next))))))
 
+(defn consecutive-ones [coll]
+  (-> coll
+      ))
+
 (println
  (->> (get-adapter-chain enriched-input)
       consecutive-ones
@@ -57,14 +66,23 @@
       (map count)
       (reduce *)))
 
-(sum-up-to-n [1 5 6] 7 [])
+(sum-up-to-n [1 2 3] 4 [])
 
+(println
+ (->> [1 3 1 1 1 1 3 1 1 1 3]
+      consecutive-ones
+      (map #(sum-up-to-n [1 2 3] % []))
+      (map count)
+      (reduce *)))
 
+;; better solution peeped in twitter
+(defn count-arrangements [adapters adapter]
+  (reduce (fn [cnts n]
+            (assoc cnts n (+ (cnts (+ n 1) 0)
+                             (cnts (+ n 2) 0)
+                             (cnts (+ n 3) 0))))
+          {(first adapters) 1}
+          (rest adapters)))
 
-
-; 1 1                             => (2)
-; 1 1 1                           => (2, 1), (1, 2)
-; 1 1 1 1                         => (1, 3), (3, 1), (2, 2), (1, 2, 1), (1, 1, 2), (2, 1, 1)
-; 1 1 1 1 1                       =>
-;
-;
+(sort
+ (count-arrangements enriched-input 0))
